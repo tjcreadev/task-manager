@@ -1,64 +1,27 @@
-const express = require('express');
-require('./db/mongoose');
-const User = require('./models/user');
-const Task = require('./models/task');
+const express = require('express')
+require('./db/mongoose')
+const userRouter = require('./routers/user')
+const taskRouter = require('./routers/task')
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
+// app.use((req,res,next) => {
+//     if(req.method === 'GET') {
+//         res.send('GET requests are disabled')
+//     } else {
+//         next()
+//     }
+// })
+
+// app.use((req,res,next) => {
+//     res.status(503).send('We are currently doing maintenance. Please try again later.')
+// })
 
 
-app.post('/users', (req, res) => {
-    const user = new User(req.body);
-
-    user.save().then((response) => {
-        res.status(201).send(response)
-    }).catch((error) => {
-        res.status(400).send(error);
-    })
-});
-
-app.get('/users', (req,res) => {
-    User.find({}).then(response => {
-        res.send(response);
-    }).catch(error => {
-        res.status(500).send();
-    })
-})
-
-app.get('/users/:id', (req,res) => {
-    const _id = req.params.id;
-
-    User.findById(_id).then(user => {
-        if (!user) {
-            return res.status(404).send()
-        }
-
-        res.send(user)
-    }).catch(error => {
-        res.status(500).send(error);
-    })
-})
-
-app.post('/tasks', (req, res) => {
-    const task = new Task(req.body);
-    
-    task.save().then(response => {
-        res.status(201).send(response)
-    }).catch(error => {
-        res.status(400).send(error)
-    })
-})
-
-
-
-
-
-
-
-
-
+app.use(express.json())
+app.use(userRouter)
+app.use(taskRouter)
 
 
 
@@ -68,3 +31,18 @@ app.listen(port, () => {
     console.log('Server is up on port ' + port);
 })
 
+
+const Task = require('./models/task')
+const User = require('./models/user')
+
+const main = async () => {
+    // const task = await Task.findById('5e0d35ea7c2b387cac104b9f')
+    // await task.populate('owner').execPopulate()
+    // console.log(task.owner.name)
+
+    const user = await User.findById('5e0d357184e5190ea8bba594')
+    await user.populate('tasks').execPopulate()
+    console.log(user.tasks)
+}
+
+main()
